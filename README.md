@@ -7,10 +7,10 @@ An auto-saving, searchable replacement for "open a new Notepad tab", with a GitH
    - Needs Windows 10/11, Microsoft Edge (built in) and Node.js 22.13+. If Node.js is missing, the installer offers to install it with winget.
    - The installer isn't code-signed yet, so Windows SmartScreen may warn: choose **More info → Run anyway**.
 2. The app is copied to `%LOCALAPPDATA%\Programs\NoteVault`; you can delete the zip afterwards.
-3. Remove it any time with **Uninstall NoteVault.cmd** (your notes are kept).
+3. Remove it any time: search the Start menu for **Uninstall NoteVault** (your notes are kept).
 
 ## Open it
-- **Win → type `notev` → Enter**, or **Ctrl+Alt+N** from anywhere. A fresh note opens with the cursor ready.
+- **Win → type `notev` → Enter**. A fresh note opens with the cursor ready. The Start-menu shortcut also gets the hotkey **Ctrl+Alt+N** (Windows may need a sign-out and back in before it responds).
 - Optional faster first open: run `install.ps1 -Startup` (pre-starts it quietly at sign-in).
 
 ## Keys
@@ -55,5 +55,5 @@ Use the toolbar, the shortcuts, or just type the Markdown shortcut — it turns 
 
 ## Other
 - Settings → Data → Import: pulls in Windows Notepad's unsaved tabs (duplicates skipped).
-- Uninstall shortcuts: `install.ps1 -Uninstall` (notes are kept).
+- Uninstall: Start menu → **Uninstall NoteVault**, or `install.ps1 -Uninstall` (notes are kept).
 - Runs entirely on this PC at `http://127.0.0.1:47823`; it accepts no outside connections.

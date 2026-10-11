@@ -16,7 +16,10 @@ $dataDir = Join-Path $env:LOCALAPPDATA 'NoteVault'
 $programs = [Environment]::GetFolderPath('Programs')
 $startupDir = [Environment]::GetFolderPath('Startup')
 $menuLnk = Join-Path $programs 'NoteVault.lnk'
+$uninstLnk = Join-Path $programs 'Uninstall NoteVault.lnk'
 $startLnk = Join-Path $startupDir 'NoteVault (background).lnk'
+$InstallDir = [IO.Path]::GetFullPath($InstallDir).TrimEnd('\')
+$src = [IO.Path]::GetFullPath($src).TrimEnd('\')
 $port = 47823
 $appFiles = @('server.js', 'notepad-import.js', 'demo-notes.js', 'public\index.html', 'public\editor.js',
               'icon.ico', 'logo.svg', 'README.md', 'THIRD-PARTY-NOTICES.txt', 'install.ps1',
@@ -54,10 +57,21 @@ function Find-Node {
 }
 
 if ($Uninstall) {
-    Stop-NoteVault
-    Remove-Item $menuLnk, $startLnk -ErrorAction SilentlyContinue
-    if ((Test-Path $InstallDir) -and ($InstallDir -ne $src)) { Remove-Item $InstallDir -Recurse -Force }
+    if (-not $NoShortcuts) {
+        Stop-NoteVault
+        Remove-Item $menuLnk, $uninstLnk, $startLnk -ErrorAction SilentlyContinue
+    }
+    if (Test-Path $InstallDir) {
+        if ($InstallDir -eq $src) {
+            # Running from inside the folder being removed (the usual case once the zip is deleted):
+            # a hidden helper deletes it a moment after this script and its .cmd have exited.
+            Start-Process cmd.exe -WindowStyle Hidden -ArgumentList "/c timeout /t 2 /nobreak >nul & rd /s /q `"$InstallDir`""
+        } else {
+            Remove-Item $InstallDir -Recurse -Force
+        }
+    }
     Say "NoteVault was removed. Your notes are still in $dataDir - delete that folder too if you want them gone." 'Green'
+    if (-not $NoShortcuts) { Read-Host 'Press Enter to close' | Out-Null }
     return
 }
 
@@ -118,6 +132,13 @@ function New-Shortcut($path, $vbs, $hotkey) {
 }
 New-Shortcut $menuLnk 'launch.vbs' 'Ctrl+Alt+N'
 if ($Startup) { New-Shortcut $startLnk 'background.vbs' $null }
+# "Uninstall NoteVault" in the Start menu, so removing it never depends on keeping the zip
+$u = $shell.CreateShortcut($uninstLnk)
+$u.TargetPath = Join-Path $InstallDir 'Uninstall NoteVault.cmd'
+$u.WorkingDirectory = $env:TEMP
+$u.IconLocation = (Join-Path $InstallDir 'icon.ico') + ',0'
+$u.Description = 'Remove NoteVault (your notes are kept)'
+$u.Save()
 
 Say ''
 Say 'Done! Open NoteVault any time: press Win, type "notev", Enter - or press Ctrl+Alt+N.' 'Green'

@@ -129,17 +129,18 @@ section { padding-block: clamp(64px, 9vw, 120px); }
 .card p { color: var(--muted); font-size: 15.5px; max-width: 52ch; }
 .card .pic { margin-top: 22px; flex: 1; display: flex; align-items: flex-end; }
 .card .pic img { width: 100%; height: auto; border-top: 1px solid var(--line); }
-.card .pad { padding: 22px 28px 28px; flex: 1; display: flex; align-items: flex-end; }
+.card .pad { padding: 22px 28px 28px; flex: 1; display: flex; align-items: center; }
 .c-search { grid-column: span 4; }
 .c-save { grid-column: span 2; }
 .c-year { grid-column: span 6; }
 .c-format, .c-image { grid-column: span 3; }
 .c-code { grid-column: span 3; }
 .c-small { grid-column: span 3; }
-.crop { overflow: hidden; }
-.crop img { flex: none; width: 150%; max-width: none; }
-.crop.right img { margin-left: -60%; }
-.crop.mid img { margin-left: -25%; }
+/* screenshot frame: zooms into one part of a full-window screenshot (--z = zoom, --x/--y = offset) */
+.shotbox { position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; margin-top: 22px; border-top: 1px solid var(--line); background: #0d1117; }
+.shotbox img { position: absolute; max-width: none; width: var(--z, 100%); left: var(--x, 0%); top: var(--y, 0%); height: auto; }
+.card .shotbox { margin-top: auto; }
+.card .txt + .shotbox { margin-top: 22px; }
 
 .saved-demo { display: grid; gap: 10px; width: 100%; font: 14px var(--mono); }
 .saved-demo .line { padding: 12px 14px; border-radius: 12px; background: var(--bg-2); box-shadow: 0 0 0 1px var(--line); color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -313,7 +314,7 @@ footer a { color: var(--muted); }
         <div class="tabpile-count"><span>Untitled 31 — Notepad</span><span>Ln 1, Col 1 · 38 tabs · 0 saved</span></div>
       </div>
       <div class="shift">
-        <div><b>Opens like Notepad</b><p>Win, type note, Enter. A clean page with the cursor ready. Or press Ctrl+Alt+N from anywhere.</p></div>
+        <div><b>Opens like Notepad</b><p>Win, type note, Enter. A clean page with the cursor ready, every time.</p></div>
         <div><b>Saves while you type</b><p>No save dialog and no file names. The first line becomes the title. Close the window any time.</p></div>
         <div><b>Finds anything</b><p>Type part of a word, even inside code, and every note that has it shows up with the match highlighted.</p></div>
       </div>
@@ -331,7 +332,7 @@ footer a { color: var(--muted); }
       <div class="bento">
         <article class="card c-search">
           <div class="txt"><h3>Ctrl+K finds anything you ever wrote</h3><p>Search every note at once, with a live preview. Type <code style="font:13px var(--mono)">serById</code> and it finds <code style="font:13px var(--mono)">getUserById</code>. Press Enter and the note opens right at the match.</p></div>
-          <div class="pic crop mid"><img src="media/palette-dark.webp" alt="Command palette searching for docker, showing nine matching notes and a preview with each match highlighted" loading="lazy" width="2400" height="1500"></div>
+          <div class="shotbox" style="--z:133%;--x:-16.5%;--y:-11%"><img src="media/palette-dark.webp" alt="Command palette searching for docker, showing nine matching notes and a preview with each match highlighted" loading="lazy" width="2400" height="1500"></div>
         </article>
 
         <article class="card c-save">
@@ -359,12 +360,12 @@ footer a { color: var(--muted); }
 
         <article class="card c-format">
           <div class="txt"><h3>Formatting, like Notepad</h3><p>Bold, headings, checklists and tables, without seeing a single asterisk. Use the toolbar, select text, or type <code style="font:13px var(--mono)">/</code> for the block menu.</p></div>
-          <div class="pic crop mid"><img src="media/slash-dark.webp" alt="The slash menu listing Text, Heading 1 to 3, Checklist, Bulleted list, Numbered list, Code block and Quote" loading="lazy" width="2400" height="1500"></div>
+          <div class="shotbox" style="--z:200%;--x:-36%;--y:-11%"><img src="media/slash-dark.webp" alt="The slash menu listing Text, Heading 1 to 3, Checklist, Bulleted list, Numbered list, Code block and Quote" loading="lazy" width="2400" height="1500"></div>
         </article>
 
         <article class="card c-image">
           <div class="txt"><h3>Paste screenshots</h3><p>Win+Shift+S, then Ctrl+V. Pictures drop straight into the note. Drag the handles to resize, double-click to see full size.</p></div>
-          <div class="pic crop mid"><img src="media/image-dark.webp" alt="A note with a pasted bar chart screenshot and resize handles" loading="lazy" width="2400" height="1500"></div>
+          <div class="shotbox" style="--z:170%;--x:-36%;--y:-9.5%"><img src="media/image-dark.webp" alt="A note with a pasted bar chart screenshot and resize handles" loading="lazy" width="2400" height="1500"></div>
         </article>
 
         <article class="card c-code">
@@ -400,7 +401,7 @@ footer a { color: var(--muted); }
       </div>
       <div class="keys">
         <div class="keyrow"><div class="caps"><span class="key">Win</span>→<span class="key">notev</span>→<span class="key">Enter</span></div><b>Open</b><p>A fresh page, cursor ready. Same muscle memory as Notepad.</p></div>
-        <div class="keyrow"><div class="caps"><span class="key">Ctrl</span><span class="key">Alt</span><span class="key">N</span></div><b>New note, anywhere</b><p>Works from any app, even with NoteVault closed.</p></div>
+        <div class="keyrow"><div class="caps"><span class="key">Alt</span><span class="key">N</span></div><b>New note</b><p>A fresh page while NoteVault is open. The old one is already saved.</p></div>
         <div class="keyrow"><div class="caps"><span class="key">Ctrl</span><span class="key">K</span></div><b>Search everything</b><p>Notes and commands in one box, with a live preview.</p></div>
         <div class="keyrow"><div class="caps"><span class="key">Ctrl</span><span class="key">O</span></div><b>Browse by day</b><p>Your notes grouped by day, plus the activity grid.</p></div>
         <div class="keyrow"><div class="caps"><span class="key">/</span></div><b>Blocks</b><p>Headings, checklists, code, tables and today's date.</p></div>
@@ -416,9 +417,9 @@ footer a { color: var(--muted); }
       </div>
       <div class="install-grid">
         <ol class="steps">
-          <li><div><b>Download the zip</b><p><a data-download href="#install">NoteVault-1.0.0-windows.zip</a> <span id="sizeStep">(268 KB)</span>. Extract it anywhere, for example Downloads.</p></div></li>
+          <li><div><b>Download the zip</b><p><a data-download href="#install"><span id="zipName">NoteVault-1.0.1-windows.zip</span></a> <span id="sizeStep">(268 KB)</span>. Extract it anywhere, for example Downloads.</p></div></li>
           <li><div><b>Double-click <code>Install NoteVault.cmd</code></b><p>No admin rights needed. If Node.js is missing, the installer offers to install it for you, then opens NoteVault.</p></div></li>
-          <li><div><b>Start writing</b><p>From now on: Win, type <code>notev</code>, Enter. Or Ctrl+Alt+N. You can delete the zip.</p></div></li>
+          <li><div><b>Start writing</b><p>From now on: Win, type <code>notev</code>, Enter. You can delete the zip.</p></div></li>
         </ol>
         <aside class="req">
           <h3>Requirements</h3>
@@ -461,8 +462,8 @@ footer a { color: var(--muted); }
         <details><summary>Can I bring my existing Notepad tabs?</summary><p>Yes. Open Settings → Data → Import. NoteVault reads Windows Notepad's unsaved tabs and copies them in, skipping any it already has.</p></details>
         <details><summary>Why does it need Node.js?</summary><p>NoteVault's engine is a small Node.js program that stores your notes and serves the app to Edge on your own PC. It's the same Node.js developers already use; the installer checks the version and can install it with winget.</p></details>
         <details><summary>Where are my notes, and how do I back them up?</summary><p>Everything lives in <code>%LOCALAPPDATA%\NoteVault</code>: <code>notes.db</code> for your notes, <code>images</code> for pasted pictures, and <code>backups</code> for the daily copies. Copy that folder to back it all up.</p></details>
-        <details><summary>Does it work on Mac or Linux?</summary><p>Not yet. NoteVault is built around Windows: the Start menu, Ctrl+Alt+N, Notepad import and the Windows 11 glass look.</p></details>
-        <details><summary>How do I uninstall it?</summary><p>Run <code>Uninstall NoteVault.cmd</code> from the folder you extracted. The app and shortcuts are removed and your notes are kept, in case you change your mind.</p></details>
+        <details><summary>Does it work on Mac or Linux?</summary><p>Not yet. NoteVault is built around Windows: the Start menu, Notepad import and the Windows 11 glass look.</p></details>
+        <details><summary>How do I uninstall it?</summary><p>Search the Start menu for <b>Uninstall NoteVault</b>. The app and its shortcuts are removed and your notes are kept, in case you change your mind.</p></details>
       </div>
     </div>
   </section>
@@ -486,7 +487,7 @@ footer a { color: var(--muted); }
 <footer>
   <div class="wrap">
     <a class="brand" href="#top" style="font-size:16px"><img src="media/logo.svg" alt="" style="width:24px;height:24px">NoteVault</a>
-    <span>Version 1.0.0 · Windows 10 &amp; 11 · Built with Tiptap, ProseMirror and highlight.js (see THIRD-PARTY-NOTICES.txt in the download)</span>
+    <span>Version <span id="verFoot">1.0.1</span> · Windows 10 &amp; 11 · Built with Tiptap, ProseMirror and highlight.js (see THIRD-PARTY-NOTICES.txt in the download)</span>
     <a data-repo href="https://github.com/imJeetrathod/notevault">GitHub</a>
   </div>
 </footer>
@@ -494,11 +495,11 @@ footer a { color: var(--muted); }
 <script>
 // One place to change the download.
 const RELEASE = {
-  version: '1.0.0',
-  url: 'https://github.com/imJeetrathod/notevault/raw/main/download/NoteVault-1.0.0-windows.zip',
+  version: '1.0.1',
+  url: 'https://github.com/imJeetrathod/notevault/raw/main/download/NoteVault-1.0.1-windows.zip',
   repo: 'https://github.com/imJeetrathod/notevault',
   sizeKB: 268,
-  sha256: '598b4c61704a189ef130f51a26dc42235e8fa6cbee6246b4898b63f67b18750e',
+  sha256: 'aaa728315830e2f8c12402f35511f8731e3282a304b4727bf12f35f1e2b8c90a',
 };
 document.querySelectorAll('[data-download]').forEach((a) => { a.href = RELEASE.url; a.rel = 'noopener'; });
 document.querySelectorAll('[data-repo]').forEach((a) => { a.href = RELEASE.repo; a.rel = 'noopener'; });
