@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a3442"/>
+      <stop offset=".5" stop-color="#151b24"/>
+      <stop offset="1" stop-color="#07090d"/>
+    </linearGradient>
+    <linearGradient id="page" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e3e8ee"/>
+    </linearGradient>
+  </defs>
+  <!-- dark tile with a faint edge so it stays visible on a dark taskbar -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#tile)"/>
+  <rect x="2.75" y="2.75" width="58.5" height="58.5" rx="15.25" fill="none" stroke="#ffffff" stroke-opacity=".14" stroke-width="1.5"/>
+  <!-- note page with a folded corner -->
+  <path d="M21 13h17.5L49 23.5V47a4.5 4.5 0 0 1-4.5 4.5h-23.5A4.5 4.5 0 0 1 16.5 47V17.5A4.5 4.5 0 0 1 21 13z" fill="url(#page)"/>
+  <path d="M38.5 13v7a3.5 3.5 0 0 0 3.5 3.5h7z" fill="#9aa6b4"/>
+  <rect x="22" y="20.5" width="13" height="3.6" rx="1.8" fill="#151b24" opacity=".75"/>
+  <!-- activity squares in GitHub greens -->
+  <rect x="22" y="29" width="6" height="6" rx="1.6" fill="#26a641"/>
+  <rect x="30" y="29" width="6" height="6" rx="1.6" fill="#9be9a8"/>
+  <rect x="38" y="29" width="6" height="6" rx="1.6" fill="#006d32"/>
+  <rect x="22" y="37" width="6" height="6" rx="1.6" fill="#40c463"/>
+  <rect x="30" y="37" width="6" height="6" rx="1.6" fill="#0e4429"/>
+  <rect x="38" y="37" width="6" height="6" rx="1.6" fill="#26a641"/>
+</svg>

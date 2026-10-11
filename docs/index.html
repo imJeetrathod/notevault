@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>NoteVault</title>
+<meta name="description" content="NoteVault replaces your pile of unsaved Notepad tabs. It saves as you type, finds anything you ever wrote, and shows your year of notes. Free for Windows.">
+<link rel="icon" type="image/svg+xml" href="media/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one tall product page that reads like the app itself — a glass window in the hero,
+   a real year-of-notes grid as the signature, keycaps for the how-to. Dark first, light mirrored. */
+:root {
+  --bg: #0b0e13; --bg-2: #0f141b; --surface: #131a23; --surface-2: #19212c;
+  --fg: #e9eef4; --muted: #96a3b4; --faint: #64707f; --line: rgba(160, 182, 210, .12); --line-2: rgba(160, 182, 210, .22);
+  --accent: #39d353; --accent-ink: #04140a; --accent-soft: rgba(57, 211, 83, .14);
+  --g0: #1a222c; --g1: #0e4429; --g2: #006d32; --g3: #26a641; --g4: #39d353;
+  --aur-1: #1fd1a5; --aur-2: #7b5cff; --aur-3: #0b6ef6;
+  --kw: #c678dd; --str: #98c379; --num: #d19a66; --com: #7f848e; --fn: #61afef;
+  --shadow: 0 30px 80px -30px rgba(0, 0, 0, .7), 0 0 0 1px var(--line);
+  --display: "Bricolage Grotesque", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --body: "Geist", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --mono: "Geist Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+  --radius: 18px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #f3f5f8; --bg-2: #eef1f5; --surface: #ffffff; --surface-2: #f6f8fa;
+  --fg: #0f1720; --muted: #4f5b6a; --faint: #7a8594; --line: rgba(15, 23, 32, .09); --line-2: rgba(15, 23, 32, .16);
+  --accent: #1a7f37; --accent-ink: #ffffff; --accent-soft: rgba(26, 127, 55, .1);
+  --g0: #e3e8ee; --g1: #9be9a8; --g2: #40c463; --g3: #30a14e; --g4: #216e39;
+  --kw: #a626a4; --str: #3f8f3e; --num: #b76b01; --com: #8a8f98; --fn: #3a6fe0;
+  --shadow: 0 30px 70px -34px rgba(15, 23, 32, .35), 0 0 0 1px var(--line);
+  color-scheme: light;
+} }
+:root[data-theme="light"] {
+  --bg: #f3f5f8; --bg-2: #eef1f5; --surface: #ffffff; --surface-2: #f6f8fa;
+  --fg: #0f1720; --muted: #4f5b6a; --faint: #7a8594; --line: rgba(15, 23, 32, .09); --line-2: rgba(15, 23, 32, .16);
+  --accent: #1a7f37; --accent-ink: #ffffff; --accent-soft: rgba(26, 127, 55, .1);
+  --g0: #e3e8ee; --g1: #9be9a8; --g2: #40c463; --g3: #30a14e; --g4: #216e39;
+  --kw: #a626a4; --str: #3f8f3e; --num: #b76b01; --com: #8a8f98; --fn: #3a6fe0;
+  --shadow: 0 30px 70px -34px rgba(15, 23, 32, .35), 0 0 0 1px var(--line);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+img, video { max-width: 100%; display: block; }
+::selection { background: var(--accent-soft); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 32px); }
+h1, h2, h3 { font-family: var(--display); letter-spacing: -.025em; line-height: 1.05; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.eyebrow { font: 500 12.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+kbd, .key { font: 500 13px/1 var(--mono); }
+
+/* atmosphere: the app's Aurora background, blurred, behind the hero only */
+.aurora { position: absolute; inset: -10% -10% auto; height: 900px; pointer-events: none; z-index: 0; filter: blur(90px) saturate(1.3); opacity: .55;
+  background: radial-gradient(40% 50% at 18% 30%, var(--aur-1), transparent 70%), radial-gradient(38% 45% at 82% 18%, var(--aur-2), transparent 70%), radial-gradient(45% 50% at 60% 75%, var(--aur-3), transparent 70%); }
+:root[data-theme="light"] .aurora { opacity: .28; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .aurora { opacity: .28; } }
+
+/* nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; backdrop-filter: blur(18px) saturate(1.4); background: color-mix(in srgb, var(--bg) 72%, transparent); border-bottom: 1px solid var(--line); }
+.nav .wrap { display: flex; align-items: center; gap: 24px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 700 18px var(--display); letter-spacing: -.02em; text-decoration: none; }
+.brand img { width: 30px; height: 30px; }
+.nav-links { display: flex; gap: 22px; margin-left: auto; font-size: 14.5px; color: var(--muted); }
+.nav-links a { text-decoration: none; }
+.nav-links a:hover { color: var(--fg); }
+.btn { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 20px; border-radius: 12px; font: 600 15px var(--body); text-decoration: none; border: 0; cursor: pointer; transition: transform .15s, box-shadow .2s, background .2s; white-space: nowrap; }
+.btn svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--accent) 70%, transparent); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 34px -10px color-mix(in srgb, var(--accent) 85%, transparent); }
+.btn-ghost { background: var(--surface); color: var(--fg); box-shadow: 0 0 0 1px var(--line-2); }
+.btn-ghost:hover { background: var(--surface-2); }
+.nav .btn { height: 38px; padding: 0 16px; font-size: 14px; }
+
+/* hero */
+.hero { position: relative; padding-block: clamp(48px, 8vw, 96px) 40px; isolation: isolate; overflow: clip; }
+.hero .wrap { position: relative; z-index: 1; }
+.hero h1 { font-size: clamp(40px, 6.2vw, 80px); font-weight: 800; max-width: 17ch; margin-top: 18px; }
+.hero h1 .soft { color: var(--muted); }
+.hero .lede { margin-top: 22px; max-width: 58ch; font-size: clamp(17px, 1.6vw, 19px); color: var(--muted); }
+.hero .lede b { color: var(--fg); font-weight: 600; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; align-items: center; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 18px; font: 13px var(--mono); color: var(--faint); }
+.meta-row span { display: inline-flex; align-items: center; gap: 7px; }
+.meta-row span::before { content: ""; width: 6px; height: 6px; border-radius: 2px; background: var(--g3); }
+
+/* app window frame */
+.window { margin-top: clamp(40px, 6vw, 64px); border-radius: 16px; overflow: hidden; background: #0d1117; box-shadow: var(--shadow); }
+.window-bar { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 14px; background: #161b22; color: #c9d1d9; font: 13px var(--body); border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.window-bar img { width: 16px; height: 16px; }
+.window-bar .ctl { margin-left: auto; display: flex; gap: 18px; color: #8b949e; font: 14px var(--mono); }
+.window video, .window img.shot { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: #0d1117; }
+.window-caption { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 14px; font: 13px var(--mono); color: var(--faint); }
+
+/* problem: the Notepad tab pile */
+section { padding-block: clamp(64px, 9vw, 120px); }
+.problem { border-top: 1px solid var(--line); }
+.section-head { display: grid; gap: 16px; max-width: 760px; }
+.section-head h2 { font-size: clamp(32px, 4.6vw, 56px); font-weight: 700; }
+.section-head p { color: var(--muted); font-size: 18px; max-width: 60ch; }
+.tabpile { margin-top: 40px; border-radius: 14px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+.tabpile-strip { display: flex; gap: 2px; padding: 8px 8px 0; background: var(--bg-2); overflow: hidden; mask-image: linear-gradient(90deg, #000 85%, transparent); }
+.ntab { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 14px; border-radius: 9px 9px 0 0; font: 13px var(--body); color: var(--muted); background: var(--surface-2); }
+.ntab.on { background: var(--surface); color: var(--fg); }
+.ntab i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.tabpile-body { padding: 22px 24px 26px; font: 14.5px/1.7 var(--mono); color: var(--muted); }
+.tabpile-body .q { color: var(--fg); }
+.tabpile-count { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--line); font: 12.5px var(--mono); color: var(--faint); }
+.shift { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+.shift div { padding: 20px 22px; border-radius: 14px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
+.shift b { display: block; font: 700 19px var(--display); letter-spacing: -.01em; margin-bottom: 6px; }
+.shift p { color: var(--muted); font-size: 15px; }
+
+/* features bento */
+.bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin-top: 48px; }
+.card { position: relative; min-width: 0; border-radius: var(--radius); background: var(--surface); box-shadow: 0 0 0 1px var(--line); overflow: hidden; display: flex; flex-direction: column; }
+.card .txt { padding: 26px 28px 0; display: grid; gap: 8px; }
+.card h3 { font-size: 24px; font-weight: 700; }
+.card p { color: var(--muted); font-size: 15.5px; max-width: 52ch; }
+.card .pic { margin-top: 22px; flex: 1; display: flex; align-items: flex-end; }
+.card .pic img { width: 100%; height: auto; border-top: 1px solid var(--line); }
+.card .pad { padding: 22px 28px 28px; flex: 1; display: flex; align-items: flex-end; }
+.c-search { grid-column: span 4; }
+.c-save { grid-column: span 2; }
+.c-year { grid-column: span 6; }
+.c-format, .c-image { grid-column: span 3; }
+.c-code { grid-column: span 3; }
+.c-small { grid-column: span 3; }
+.crop { overflow: hidden; }
+.crop img { flex: none; width: 150%; max-width: none; }
+.crop.right img { margin-left: -60%; }
+.crop.mid img { margin-left: -25%; }
+
+.saved-demo { display: grid; gap: 10px; width: 100%; font: 14px var(--mono); }
+.saved-demo .line { padding: 12px 14px; border-radius: 12px; background: var(--bg-2); box-shadow: 0 0 0 1px var(--line); color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.saved-demo .caret { display: inline-block; width: 2px; height: 1.1em; vertical-align: -3px; background: var(--accent); animation: blink 1s steps(1) infinite; }
+.pill { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; padding: 6px 12px; border-radius: 999px; background: var(--accent-soft); color: var(--fg); font: 13px var(--mono); }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--g3); animation: pulse 2.4s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes pulse { 50% { box-shadow: 0 0 0 5px transparent; } 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--g3) 60%, transparent); } }
+
+/* the year grid */
+.year { padding: 26px 28px 28px; display: grid; gap: 18px; }
+.year-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.year-stats { display: flex; gap: 28px; flex-wrap: wrap; }
+.year-stats b { display: block; font: 700 28px var(--display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.year-stats span { font: 12.5px var(--mono); color: var(--faint); }
+.grid-scroll { overflow-x: auto; padding-bottom: 4px; }
+.months { display: grid; grid-auto-flow: column; grid-auto-columns: var(--cell); gap: 3px; font: 11px var(--mono); color: var(--faint); height: 16px; margin-left: 34px; width: max-content; }
+.hm-wrap { display: flex; gap: 8px; width: max-content; }
+.days { display: grid; grid-template-rows: repeat(7, var(--cell)); gap: 3px; font: 11px var(--mono); color: var(--faint); width: 26px; align-items: center; }
+.hm { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, var(--cell)); grid-auto-columns: var(--cell); gap: 3px; }
+.year { --cell: 14px; }
+@media (min-width: 1140px) { .year { --cell: 16px; } }
+.hm i { border-radius: 3.5px; background: var(--g0); transition: transform .12s; }
+.hm i:hover { transform: scale(1.3); }
+.hm i[data-l="1"] { background: var(--g1); } .hm i[data-l="2"] { background: var(--g2); } .hm i[data-l="3"] { background: var(--g3); } .hm i[data-l="4"] { background: var(--g4); }
+.legend { display: flex; align-items: center; gap: 4px; font: 12px var(--mono); color: var(--faint); }
+.legend i { width: 12px; height: 12px; border-radius: 3px; }
+.year-note { font: 13px var(--mono); color: var(--faint); }
+
+/* code card */
+.code { margin: 0; padding: 18px 20px; border-radius: 12px; background: var(--bg-2); box-shadow: 0 0 0 1px var(--line); font: 13.5px/1.7 var(--mono); color: var(--fg); overflow-x: auto; width: 100%; white-space: pre; }
+.code .k { color: var(--kw); } .code .s { color: var(--str); } .code .n { color: var(--num); } .code .c { color: var(--com); font-style: italic; } .code .f { color: var(--fn); }
+
+/* small facts */
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; width: 100%; }
+.facts div { padding: 16px 0; border-top: 1px solid var(--line); display: grid; gap: 2px; }
+.facts div:nth-child(odd) { padding-right: 18px; }
+.facts b { font: 600 15.5px var(--body); }
+.facts span { color: var(--muted); font-size: 14px; }
+
+/* keys */
+.keys { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-top: 44px; }
+.keyrow { padding: 22px 20px; border-radius: 16px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); display: grid; gap: 14px; align-content: start; }
+.caps { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: var(--faint); font: 13px var(--mono); }
+.key { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; padding: 0 10px; border-radius: 9px; color: var(--fg);
+  background: linear-gradient(var(--surface-2), var(--surface)); box-shadow: 0 0 0 1px var(--line-2), 0 3px 0 0 var(--line-2); }
+.keyrow b { font: 700 18px var(--display); letter-spacing: -.01em; }
+.keyrow p { color: var(--muted); font-size: 14.5px; }
+
+/* install */
+.install { border-top: 1px solid var(--line); }
+.install-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 40px; margin-top: 44px; align-items: start; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 16px; padding: 20px 22px; border-radius: 16px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
+.steps li::before { content: counter(s); width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font: 700 20px var(--display); background: var(--accent-soft); color: var(--accent); }
+.steps b { display: block; font: 700 18px var(--display); margin-bottom: 3px; }
+.steps p { color: var(--muted); font-size: 15px; }
+.steps code, .req code, .faq code { font: 13px var(--mono); padding: 2px 6px; border-radius: 6px; background: var(--surface-2); box-shadow: 0 0 0 1px var(--line); color: var(--fg); }
+.req { padding: 24px 26px; border-radius: 16px; background: var(--bg-2); box-shadow: 0 0 0 1px var(--line); display: grid; gap: 18px; }
+.req h3 { font-size: 20px; }
+.req ul { margin: 0; padding-left: 18px; color: var(--muted); display: grid; gap: 6px; font-size: 15px; }
+.req ul b { color: var(--fg); font-weight: 600; }
+.note { font-size: 14px; color: var(--muted); padding: 14px 16px; border-radius: 12px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
+.hash { display: grid; gap: 8px; }
+.hash-row { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.hash-row input { flex: 1; min-width: 0; height: 36px; padding: 0 10px; border-radius: 9px; border: 0; background: var(--surface); box-shadow: 0 0 0 1px var(--line); color: var(--muted); font: 12px var(--mono); }
+.hash-row button { height: 36px; padding: 0 14px; border-radius: 9px; border: 0; background: var(--surface-2); box-shadow: 0 0 0 1px var(--line-2); color: var(--fg); font: 500 13px var(--body); cursor: pointer; }
+
+/* privacy */
+.privacy-inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; }
+.path { margin-top: 24px; padding: 16px 18px; border-radius: 12px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); font: 14px var(--mono); color: var(--fg); overflow-x: auto; white-space: nowrap; }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.checks li { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; border-radius: 14px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
+.checks svg { width: 20px; height: 20px; flex: 0 0 auto; color: var(--accent); margin-top: 2px; }
+.checks b { display: block; font-weight: 600; }
+.checks span { color: var(--muted); font-size: 14.5px; }
+
+/* faq */
+.faq { border-top: 1px solid var(--line); }
+.faq-list { margin-top: 36px; display: grid; gap: 10px; max-width: 860px; }
+.faq details { border-radius: 14px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
+.faq summary { cursor: pointer; list-style: none; padding: 18px 22px; font: 600 16.5px var(--body); display: flex; justify-content: space-between; gap: 16px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font: 400 22px/1 var(--mono); color: var(--faint); transition: transform .2s; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq details p { padding: 0 22px 20px; color: var(--muted); max-width: 70ch; }
+
+/* final cta */
+.final { position: relative; overflow: hidden; isolation: isolate; text-align: left; }
+.final-box { position: relative; border-radius: 28px; padding: clamp(36px, 6vw, 72px); background: var(--surface); box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+.final-box .aurora { inset: -40% -20%; height: auto; opacity: .35; }
+.final-box > * { position: relative; z-index: 1; }
+.final h2 { font-size: clamp(34px, 5vw, 64px); font-weight: 800; max-width: 16ch; }
+.final p { margin-top: 16px; color: var(--muted); font-size: 18px; max-width: 54ch; }
+
+footer { border-top: 1px solid var(--line); padding-block: 36px 48px; color: var(--faint); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between; }
+footer a { color: var(--muted); }
+
+/* responsive */
+@media (max-width: 980px) {
+  .c-search, .c-save, .c-format, .c-image, .c-code, .c-small { grid-column: span 6; }
+  .keys { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .install-grid, .privacy-inner { grid-template-columns: minmax(0, 1fr); }
+  .shift { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+  .nav .btn { margin-left: auto; }
+  .keys { grid-template-columns: minmax(0, 1fr); }
+  .facts { grid-template-columns: minmax(0, 1fr); }
+  .facts div:nth-child(odd) { padding-right: 0; }
+  .card .txt { padding: 22px 20px 0; } .card .pad, .year { padding-inline: 20px; }
+  .window-bar .ctl { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="media/logo.svg" alt="">NoteVault</a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#features">Features</a><a href="#keys">Shortcuts</a><a href="#install">Install</a><a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-primary" data-download href="#install">Download</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="wrap">
+      <p class="eyebrow">For Windows developers who live in Notepad</p>
+      <h1>Stop naming Notepad tabs. <span class="soft">Start finding notes.</span></h1>
+      <p class="lede">NoteVault opens like Notepad: press <b>Win</b>, type <b>note</b>, start writing. Everything <b>saves as you type</b>, <b>Ctrl+K</b> finds anything you ever wrote, and a GitHub-style grid shows every day you wrote something.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" data-download href="#install">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+          Download for Windows
+        </a>
+        <a class="btn btn-ghost" href="#demo">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
+          Watch the 30-second demo
+        </a>
+      </div>
+      <div class="meta-row"><span>Free</span><span>Windows 10 &amp; 11</span><span id="sizeMeta">268 KB download</span><span>Works offline</span></div>
+
+      <div class="window" id="demo">
+        <div class="window-bar"><img src="media/logo.svg" alt="">Release checklist — NoteVault<span class="ctl" aria-hidden="true">—&nbsp;&nbsp;▢&nbsp;&nbsp;✕</span></div>
+        <video id="demoVideo" src="media/demo.webm" poster="media/demo-poster.webp" autoplay muted loop playsinline preload="metadata" aria-label="NoteVault demo: writing a checklist, pasting code, searching with Ctrl+K and opening the activity grid"></video>
+      </div>
+      <div class="window-caption"><span>Real recording · typing, the / menu, pasting code, Ctrl+K search, the activity grid</span><span>No sound</span></div>
+    </div>
+  </section>
+
+  <section class="problem">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Sound familiar?</p>
+        <h2>It's the end of the month. You have 38 Notepad tabs.</h2>
+        <p>None are saved, because saving means naming. Somewhere in there is the SQL query from last Tuesday. You open them one by one until you find it.</p>
+      </div>
+      <div class="tabpile" aria-hidden="true">
+        <div class="tabpile-strip" id="tabStrip"></div>
+        <div class="tabpile-body">
+          <span class="q">SELECT email, COUNT(*) AS cnt</span><br>FROM users<br>GROUP BY email ...<br><br>// backup before refactor — DON'T DELETE<br>function cartTotal(items) {
+        </div>
+        <div class="tabpile-count"><span>Untitled 31 — Notepad</span><span>Ln 1, Col 1 · 38 tabs · 0 saved</span></div>
+      </div>
+      <div class="shift">
+        <div><b>Opens like Notepad</b><p>Win, type note, Enter. A clean page with the cursor ready. Or press Ctrl+Alt+N from anywhere.</p></div>
+        <div><b>Saves while you type</b><p>No save dialog and no file names. The first line becomes the title. Close the window any time.</p></div>
+        <div><b>Finds anything</b><p>Type part of a word, even inside code, and every note that has it shows up with the match highlighted.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">What's inside</p>
+        <h2>Everything Notepad does, plus memory.</h2>
+        <p>Built for the way developers actually use a scratchpad: code backups, quick tasks, half-written thoughts.</p>
+      </div>
+
+      <div class="bento">
+        <article class="card c-search">
+          <div class="txt"><h3>Ctrl+K finds anything you ever wrote</h3><p>Search every note at once, with a live preview. Type <code style="font:13px var(--mono)">serById</code> and it finds <code style="font:13px var(--mono)">getUserById</code>. Press Enter and the note opens right at the match.</p></div>
+          <div class="pic crop mid"><img src="media/palette-dark.webp" alt="Command palette searching for docker, showing nine matching notes and a preview with each match highlighted" loading="lazy" width="2400" height="1500"></div>
+        </article>
+
+        <article class="card c-save">
+          <div class="txt"><h3>Nothing to save</h3><p>Every keystroke is stored within half a second. Even if the window closes mid-sentence, the text comes back.</p></div>
+          <div class="pad"><div class="saved-demo">
+            <span class="pill"><i></i>Saved</span>
+            <div class="line">git stash push -m "wip"<span class="caret"></span></div>
+            <div class="line" style="color:var(--muted)">No file name. No dialog.</div>
+          </div></div>
+        </article>
+
+        <article class="card c-year">
+          <div class="year">
+            <div class="year-top">
+              <div class="txt" style="padding:0"><h3>Your year of notes, GitHub style</h3><p>Every square is a day you wrote or edited something. Click a day in the app to see exactly those notes.</p></div>
+              <div class="year-stats"><div><b id="ysTotal">0</b><span>notes this year</span></div><div><b id="ysDays">0</b><span>active days</span></div><div><b id="ysStreak">0</b><span>best streak</span></div></div>
+            </div>
+            <div class="grid-scroll" id="yearScroll">
+              <div class="months" id="months"></div>
+              <div class="hm-wrap"><div class="days"><span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span></div><div class="hm" id="hm" role="img" aria-label="Example activity grid for one year"></div></div>
+            </div>
+            <div class="year-top"><span class="year-note">Example data · your own grid starts filling on day one</span><span class="legend">Less <i style="background:var(--g0)"></i><i style="background:var(--g1)"></i><i style="background:var(--g2)"></i><i style="background:var(--g3)"></i><i style="background:var(--g4)"></i> More</span></div>
+          </div>
+        </article>
+
+        <article class="card c-format">
+          <div class="txt"><h3>Formatting, like Notepad</h3><p>Bold, headings, checklists and tables, without seeing a single asterisk. Use the toolbar, select text, or type <code style="font:13px var(--mono)">/</code> for the block menu.</p></div>
+          <div class="pic crop mid"><img src="media/slash-dark.webp" alt="The slash menu listing Text, Heading 1 to 3, Checklist, Bulleted list, Numbered list, Code block and Quote" loading="lazy" width="2400" height="1500"></div>
+        </article>
+
+        <article class="card c-image">
+          <div class="txt"><h3>Paste screenshots</h3><p>Win+Shift+S, then Ctrl+V. Pictures drop straight into the note. Drag the handles to resize, double-click to see full size.</p></div>
+          <div class="pic crop mid"><img src="media/image-dark.webp" alt="A note with a pasted bar chart screenshot and resize handles" loading="lazy" width="2400" height="1500"></div>
+        </article>
+
+        <article class="card c-code">
+          <div class="txt"><h3>Code stays code</h3><p>Paste from VS Code and it lands in a code block with your indentation and syntax colours. Perfect for "backup before I change this".</p></div>
+          <div class="pad"><pre class="code"><span class="c">// Backup before refactor — useAutosave</span>
+<span class="k">export function</span> <span class="f">useAutosave</span>(value, save, delay = <span class="n">400</span>) {
+  <span class="k">const</span> timer = <span class="f">useRef</span>();
+  <span class="f">useEffect</span>(() =&gt; {
+    <span class="f">clearTimeout</span>(timer.current);
+    timer.current = <span class="f">setTimeout</span>(() =&gt; <span class="f">save</span>(value), delay);
+  }, [value]);
+}</pre></div>
+        </article>
+
+        <article class="card c-small">
+          <div class="txt"><h3>The small things</h3><p>Details you only miss when they're gone.</p></div>
+          <div class="pad"><div class="facts">
+            <div><b>Version history</b><span>A copy every 10 minutes of editing, one click to restore.</span></div>
+            <div><b>Trash with Undo</b><span>Deleting never really deletes until you say so.</span></div>
+            <div><b>Import Notepad tabs</b><span>Pull in your current unsaved tabs in one click.</span></div>
+            <div><b>Glass, light or dark</b><span>Blends with your wallpaper, like Windows 11.</span></div>
+          </div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="keys" style="border-top:1px solid var(--line)">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Shortcuts</p>
+        <h2>Five shortcuts. That's the whole manual.</h2>
+      </div>
+      <div class="keys">
+        <div class="keyrow"><div class="caps"><span class="key">Win</span>→<span class="key">notev</span>→<span class="key">Enter</span></div><b>Open</b><p>A fresh page, cursor ready. Same muscle memory as Notepad.</p></div>
+        <div class="keyrow"><div class="caps"><span class="key">Ctrl</span><span class="key">Alt</span><span class="key">N</span></div><b>New note, anywhere</b><p>Works from any app, even with NoteVault closed.</p></div>
+        <div class="keyrow"><div class="caps"><span class="key">Ctrl</span><span class="key">K</span></div><b>Search everything</b><p>Notes and commands in one box, with a live preview.</p></div>
+        <div class="keyrow"><div class="caps"><span class="key">Ctrl</span><span class="key">O</span></div><b>Browse by day</b><p>Your notes grouped by day, plus the activity grid.</p></div>
+        <div class="keyrow"><div class="caps"><span class="key">/</span></div><b>Blocks</b><p>Headings, checklists, code, tables and today's date.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="install" id="install">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Install</p>
+        <h2>Running in under a minute.</h2>
+      </div>
+      <div class="install-grid">
+        <ol class="steps">
+          <li><div><b>Download the zip</b><p><a data-download href="#install">NoteVault-1.0.0-windows.zip</a> <span id="sizeStep">(268 KB)</span>. Extract it anywhere, for example Downloads.</p></div></li>
+          <li><div><b>Double-click <code>Install NoteVault.cmd</code></b><p>No admin rights needed. If Node.js is missing, the installer offers to install it for you, then opens NoteVault.</p></div></li>
+          <li><div><b>Start writing</b><p>From now on: Win, type <code>notev</code>, Enter. Or Ctrl+Alt+N. You can delete the zip.</p></div></li>
+        </ol>
+        <aside class="req">
+          <h3>Requirements</h3>
+          <ul>
+            <li><b>Windows 10 or 11</b>. Not available for Mac or Linux yet.</li>
+            <li><b>Microsoft Edge</b>, which comes with Windows. NoteVault opens in its own window.</li>
+            <li><b>Node.js 22.13 or newer</b>, free. The installer can set it up.</li>
+          </ul>
+          <p class="note">Windows may show a SmartScreen warning because the installer isn't code-signed yet. Choose <b>More info</b>, then <b>Run anyway</b>. The full source is on <a data-repo href="https://github.com/imJeetrathod/notevault">GitHub</a> if you'd like to read it first.</p>
+          <div class="hash">
+            <span class="eyebrow">SHA-256 checksum</span>
+            <div class="hash-row"><input id="sha" readonly value="" aria-label="SHA-256 checksum of the download"><button type="button" id="copySha">Copy</button></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="privacy">
+    <div class="wrap privacy-inner">
+      <div class="section-head">
+        <p class="eyebrow">Privacy</p>
+        <h2>Your notes never leave your PC.</h2>
+        <p>No account, no cloud, no tracking. NoteVault runs a tiny server on your own computer that only your computer can reach.</p>
+        <div class="path">%LOCALAPPDATA%\NoteVault\notes.db</div>
+      </div>
+      <ul class="checks">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><div><b>Works offline</b><span>Nothing to sign into. No internet needed after installing.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><div><b>Daily backups</b><span>A copy of your notes is kept every day for the last 14 days.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><div><b>Easy to leave</b><span>Uninstalling keeps your notes. They're a normal SQLite file you can open anywhere.</span></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <div class="wrap">
+      <div class="section-head"><p class="eyebrow">Questions</p><h2>Good to know</h2></div>
+      <div class="faq-list">
+        <details><summary>Is it really free?</summary><p>Yes. There's no paid plan, no account and no ads.</p></details>
+        <details><summary>Can I bring my existing Notepad tabs?</summary><p>Yes. Open Settings → Data → Import. NoteVault reads Windows Notepad's unsaved tabs and copies them in, skipping any it already has.</p></details>
+        <details><summary>Why does it need Node.js?</summary><p>NoteVault's engine is a small Node.js program that stores your notes and serves the app to Edge on your own PC. It's the same Node.js developers already use; the installer checks the version and can install it with winget.</p></details>
+        <details><summary>Where are my notes, and how do I back them up?</summary><p>Everything lives in <code>%LOCALAPPDATA%\NoteVault</code>: <code>notes.db</code> for your notes, <code>images</code> for pasted pictures, and <code>backups</code> for the daily copies. Copy that folder to back it all up.</p></details>
+        <details><summary>Does it work on Mac or Linux?</summary><p>Not yet. NoteVault is built around Windows: the Start menu, Ctrl+Alt+N, Notepad import and the Windows 11 glass look.</p></details>
+        <details><summary>How do I uninstall it?</summary><p>Run <code>Uninstall NoteVault.cmd</code> from the folder you extracted. The app and shortcuts are removed and your notes are kept, in case you change your mind.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <div class="final-box">
+        <div class="aurora" aria-hidden="true"></div>
+        <p class="eyebrow">NoteVault 1.0 for Windows</p>
+        <h2 style="margin-top:14px">Close every Notepad tab. For good.</h2>
+        <p>Keep the habit of opening a fresh page. Lose the mess of unsaved, unnamed tabs.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" data-download href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download for Windows</a>
+          <a class="btn btn-ghost" data-repo href="https://github.com/imJeetrathod/notevault"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.4-2.2-.3-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7c-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7a3.9 3.9 0 0 1 1 2.7c0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg>View source on GitHub</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top" style="font-size:16px"><img src="media/logo.svg" alt="" style="width:24px;height:24px">NoteVault</a>
+    <span>Version 1.0.0 · Windows 10 &amp; 11 · Built with Tiptap, ProseMirror and highlight.js (see THIRD-PARTY-NOTICES.txt in the download)</span>
+    <a data-repo href="https://github.com/imJeetrathod/notevault">GitHub</a>
+  </div>
+</footer>
+
+<script>
+// One place to change the download.
+const RELEASE = {
+  version: '1.0.0',
+  url: 'https://github.com/imJeetrathod/notevault/raw/main/download/NoteVault-1.0.0-windows.zip',
+  repo: 'https://github.com/imJeetrathod/notevault',
+  sizeKB: 268,
+  sha256: '598b4c61704a189ef130f51a26dc42235e8fa6cbee6246b4898b63f67b18750e',
+};
+document.querySelectorAll('[data-download]').forEach((a) => { a.href = RELEASE.url; a.rel = 'noopener'; });
+document.querySelectorAll('[data-repo]').forEach((a) => { a.href = RELEASE.repo; a.rel = 'noopener'; });
+document.getElementById('sizeMeta').textContent = RELEASE.sizeKB + ' KB download';
+document.getElementById('sizeStep').textContent = '(' + RELEASE.sizeKB + ' KB)';
+const sha = document.getElementById('sha');
+sha.value = RELEASE.sha256;
+document.getElementById('copySha').addEventListener('click', async (e) => {
+  try { await navigator.clipboard.writeText(RELEASE.sha256); e.target.textContent = 'Copied'; }
+  catch { sha.focus(); sha.select(); e.target.textContent = 'Press Ctrl+C'; }
+  setTimeout(() => (e.target.textContent = 'Copy'), 1800);
+});
+
+// The pile of unnamed Notepad tabs
+const strip = document.getElementById('tabStrip');
+strip.innerHTML = Array.from({ length: 14 }, (_, i) => `<span class="ntab${i === 3 ? ' on' : ''}"><i></i>Untitled ${[31, 32, 33, 34, 35, 36, 37, 38, 29, 30, 27, 28, 25, 26][i]}</span>`).join('');
+
+// Example year grid (seeded, so it looks the same for everyone)
+(function yearGrid() {
+  let seed = 20261011;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+  const end = new Date(); end.setHours(0, 0, 0, 0);
+  const start = new Date(end); start.setDate(start.getDate() - 52 * 7 - end.getDay());
+  const cells = [], months = [];
+  let total = 0, days = 0, run = 0, best = 0, lastMonth = -1;
+  for (let w = 0; w < 53; w++) {
+    const ws = new Date(start); ws.setDate(start.getDate() + w * 7);
+    const label = ws.getMonth() !== lastMonth && ws.getDate() <= 7 ? ws.toLocaleDateString('en', { month: 'short' }) : '';
+    if (label) lastMonth = ws.getMonth();
+    months.push(`<span>${label}</span>`);
+    for (let d = 0; d < 7; d++) {
+      const dt = new Date(ws); dt.setDate(ws.getDate() + d);
+      if (dt > end) { cells.push('<i style="visibility:hidden"></i>'); continue; }
+      const weekend = d === 0 || d === 6, recency = w / 53;
+      let p = (weekend ? 0.18 : 0.62) + recency * 0.25; if (w > 20 && w < 24) p = 0.05;
+      let n = 0; while (rnd() < p && n < 7) { n++; p *= 0.62; }
+      if (n) { total += n; days++; run++; best = Math.max(best, run); } else run = 0;
+      const l = !n ? 0 : n >= 5 ? 4 : n >= 3 ? 3 : n >= 2 ? 2 : 1;
+      cells.push(`<i data-l="${l}" title="${n ? n + ' note' + (n > 1 ? 's' : '') : 'No notes'} · ${dt.toLocaleDateString('en', { month: 'short', day: 'numeric' })}"></i>`);
+    }
+  }
+  document.getElementById('hm').innerHTML = cells.join('');
+  document.getElementById('months').innerHTML = months.join('');
+  document.getElementById('ysTotal').textContent = total.toLocaleString('en');
+  document.getElementById('ysDays').textContent = days;
+  document.getElementById('ysStreak').textContent = best + ' days';
+  const sc = document.getElementById('yearScroll'); sc.scrollLeft = sc.scrollWidth;
+})();
+
+// Respect reduced motion: no autoplaying video, give controls instead
+const v = document.getElementById('demoVideo');
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) { v.removeAttribute('autoplay'); v.pause(); v.controls = true; }
+else v.play().catch(() => { v.controls = true; });
+</script>
+
+</body>
+</html>

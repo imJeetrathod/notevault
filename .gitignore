@@ -1,0 +1,7 @@
+# build output and per-machine files
+dist/
+site/
+launch.vbs
+background.vbs
+logo-preview.png
+node_modules/

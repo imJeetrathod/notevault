@@ -1,0 +1,22 @@
+NoteVault includes the following open-source software, bundled in public/editor.js.
+
+- Tiptap 3.31.4 (@tiptap/*)              MIT License        https://github.com/ueberdosis/tiptap
+- ProseMirror (model 1.25, view 1.42, state 1.4, transform 1.12, tables 1.8)
+                                         MIT License        https://prosemirror.net
+- lowlight 3.3.0                         MIT License        https://github.com/wooorm/lowlight
+- highlight.js 11.12.0                   BSD-3-Clause       https://highlightjs.org
+- linkifyjs 4.3.3                        MIT License        https://linkify.js.org
+- orderedmap 2.1.1, rope-sequence 1.3.4, w3c-keyname 2.2.8
+                                         MIT License        https://github.com/marijnh
+
+MIT License: Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files, to deal in the Software without restriction, subject
+to including the copyright notice and this permission notice in all copies. THE SOFTWARE IS PROVIDED
+"AS IS", WITHOUT WARRANTY OF ANY KIND.
+
+BSD-3-Clause (highlight.js): Copyright (c) 2006, Ivan Sagalaev. Redistribution and use in source and
+binary forms, with or without modification, are permitted provided that the copyright notice, this
+list of conditions and the disclaimer are retained, and the names of the contributors are not used
+to endorse derived products without permission. PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+
+NoteVault runs entirely on your PC with Node.js (https://nodejs.org) and opens in Microsoft Edge.
